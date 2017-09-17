@@ -29,85 +29,54 @@ router.get('/qrytitle', function (req, res) {
         var fndlen = 0;
         var fndher = "";
         var song = req.query.title;
+        song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "");
 
-        song = song.toLowerCase().replace(/\&/g, "and").replace(/^\d{4}$/g, "").replace(/["]+/g, "");
-        var song_arr;
-        stopwords.forEach(function (a, j) {
-            var stopwrd_arr = cnvr2arr(a);
-            song_arr = cnvr2arr(song);
-            song = frmstrng(song_arr, stopwrd_arr);
-        });
-        song_arr = cnvr2arr(song);
+        mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
 
-
-        var d_arr;
-        for (var i = 0; i < song_arr.length; i++) {
-            var srchval = sofiaTree.getCompletions((song_arr[i]));
-            srchval.forEach(function (d) {
-                fndstr.push(d);
+        mtcharr.forEach(function (mtchstr, i) {
+            stopwords.forEach(function (stopstr) {
+                if (~mtchstr.indexOf(stopwords)) {
+                    mtcharr[i] = "";
+                }
             });
-        }
-        var retarr = [];
-        fndstr.forEach(function (d) {
-            d = d.toLowerCase().replace(/\&/g, "and");
-            d_arr = cnvr2arr(d);
-            var retval = JSON.parse(arrfunc(song_arr, d_arr, d));
-
-            if (retval.bool === true)
-                retarr.push(retval.value);
         });
 
-
-        for (k = 0; k < retarr.length; k++) {
-            if (k === retarr.length - 1)
-                break;
-            if (retarr[k].length <= retarr[k + 1].length) {
-                if (retarr[k + 1].indexOf(retarr[k]) > -1) {
-                    if (retarr[k + 1].indexOf("and") > -1)
-                        retarr[k + 1] = "";
-                    else
-                        retarr[k] = "";
+        compact.compact(mtcharr);
+        var retsngr = [];
+        var retsong = "";
+        for (k = 0; k < mtcharr.length; k++) {
+            var sngrarr = mtcharr[k].trim().match(/(.*)and(.*)/);
+            var fndflg = false;
+            if (sngrarr !== null) {
+                sngrarr.forEach(function (sngrstr) {
+                    sngrstr = sngrstr.trim();
+                    fndrslt = sofiaTree.getCompletions(sngrstr);
+                    if (fndrslt.length > 0) {
+                        retsngr.push(fndrslt[0]);
+                        if (k === 0 && retsong == "") {
+                            retsong = mtcharr[1].trim();
+                        } else if (k === 1 && retsong == "") {
+                            retsong = mtcharr[0].trim();
+                        }
+                        k = mtcharr.length;
+                    }
+                });
+                
+            } else {
+                fndrslt = sofiaTree.getCompletions(mtcharr[k].trim());
+                if (fndrslt.length > 0) {
+                    retsngr.push(fndrslt[0]);
+                    if (k === 0)
+                        retsong = mtcharr[1].trim();
+                    else if (k === 1)
+                        retsong = mtcharr[0].trim();
+                    k = mtcharr.length;
                 }
             }
-        };
-        retarr.forEach(function (c, t) {
-            if (compact.contains(typsng, c))
-                retarr[t] = "";
-        });
-        retarr = compact.compact(retarr);
-
-        console.log(retarr);              
-        mtcharr=song.match(new RegExp('(.*)(?:\\s\\-\\s)(.*)'));                  
-        
-        tmpstra=mtcharr[1];
-        var retarra=[];
-        retarr.forEach(function(c){
-            tmpstr=frmstrng(cnvr2arr(tmpstra),cnvr2arr(c));
-            if (tmpstr.length<tmpstra.length)
-                retarra.push(c);
-            tmpstra=tmpstr;    
-
-        });
-
-        tmpstrb=mtcharr[2];
-        var retarrb=[];
-        retarr.forEach(function(c){
-            tmpstr=frmstrng(cnvr2arr(tmpstrb),cnvr2arr(c))            
-            if (tmpstr.length<tmpstrb.length)
-                retarrb.push(c);
-            tmpstrb=tmpstr;    
-        });
-        
-        if (tmpstra.length>tmpstrb.length) {
-            console.log(mtcharr[1]);
-            console.log(retarrb);
-            res.send('{"song":"' + mtcharr[1] + '","singer":' + JSON.stringify(retarrb) + '}');
         }
-        else {
-            console.log(mtcharr[2]);
-            console.log(retarra);
-            res.send('{"song":"' + mtcharr[2] + '","singer":' + JSON.stringify(retarra) + '}');
-        }
+
+        res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
+
     }, 3000)
 
 });
@@ -120,7 +89,26 @@ function cnvr2arr(tmp) {
     // else
     //     tmp = tmp.toLowerCase().replace(/[-]/, " ").replace(/[^a-zA-Z0-9' ]/g, "");
     var wrdarry = tmp.split(" ");
+    var tmp = wrdarry;
+    // tmp.forEach(function(k,i) {
+    //     var t=k.match(new RegExp('(\")(.*)'));
+    //     if (t!==null){
+    //         t.forEach(function(m,j) {
+    //             if ((m!=='"') && (j==0)) {
+    //                 wrdarry[i]=m;
+    //                 wrdarry.splice(i+1,0,'"');
+    //             }
+    //             else if ((m!=='"') && (j==1)){
+    //                 wrdarry.splice(i+1,0,'"');
+    //                 wrdarry
+    //             }
+
+    //             });                               
+    //     };    
+    // });
+
     wrdarry = compact.compact(wrdarry);
+
     return wrdarry;
 }
 

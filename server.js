@@ -5,7 +5,8 @@ var d3 = require("d3");
 var fs = require("fs");
 
 
-app.use(bodyParser.urlencoded({
+app.use(bodyParser.
+    urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
@@ -18,7 +19,7 @@ var initnamedb = function () {
     var data = "";
     var readStream = fs.createReadStream('kimonocsv.csv', 'utf8');
     readStream.on('data', function (chunk) {
-        data += chunk;
+        data += chunk;                              
     }).on('end', function () {  
         data = d3.csvParse(data);
         strrs = data.map(function (d, i) {
