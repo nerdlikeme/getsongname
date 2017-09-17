@@ -44,39 +44,42 @@ router.get('/qrytitle', function (req, res) {
         compact.compact(mtcharr);
         var retsngr = [];
         var retsong = "";
-        for (k = 0; k < mtcharr.length; k++) {
-            var sngrarr = mtcharr[k].trim().match(/(.*)and(.*)/);
-            var fndflg = false;
-            if (sngrarr !== null) {
-                sngrarr.forEach(function (sngrstr) {
-                    sngrstr = sngrstr.trim();
-                    fndrslt = sofiaTree.getCompletions(sngrstr);
+
+        if (mtcharr.length > 1) {
+            for (k = 0; k < mtcharr.length; k++) {
+                var sngrarr = mtcharr[k].trim().match(/(.*)and(.*)/);
+                var fndflg = false;
+                if (sngrarr !== null) {
+                    sngrarr.forEach(function (sngrstr) {
+                        sngrstr = sngrstr.trim();
+                        fndrslt = sofiaTree.getCompletions(sngrstr);
+                        if (fndrslt.length > 0) {
+                            retsngr.push(fndrslt[0]);
+                            if (k === 0 && retsong == "") {
+                                retsong = mtcharr[1].trim();
+                            } else if (k === 1 && retsong == "") {
+                                retsong = mtcharr[0].trim();
+                            }
+                            k = mtcharr.length;
+                        }
+                    });
+
+                } else {
+                    fndrslt = sofiaTree.getCompletions(mtcharr[k].trim());
                     if (fndrslt.length > 0) {
                         retsngr.push(fndrslt[0]);
-                        if (k === 0 && retsong == "") {
+                        if (k === 0)
                             retsong = mtcharr[1].trim();
-                        } else if (k === 1 && retsong == "") {
+                        else if (k === 1)
                             retsong = mtcharr[0].trim();
-                        }
                         k = mtcharr.length;
                     }
-                });
-                
-            } else {
-                fndrslt = sofiaTree.getCompletions(mtcharr[k].trim());
-                if (fndrslt.length > 0) {
-                    retsngr.push(fndrslt[0]);
-                    if (k === 0)
-                        retsong = mtcharr[1].trim();
-                    else if (k === 1)
-                        retsong = mtcharr[0].trim();
-                    k = mtcharr.length;
                 }
             }
-        }
 
-        res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
-
+            res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
+        } else
+            res.send('{"song":"","singer":""}');
     }, 3000)
 
 });
