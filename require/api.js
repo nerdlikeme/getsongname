@@ -3,18 +3,9 @@ var router = express.Router();
 var compact = require('underscore');
 var SofiaTree = require('sofia-tree');
 var fuzzy = require('fuzzy');
-//var lev = require('fast-levenshtein');
-//var natural = require('natural');
-//var metaphone = natural.Metaphone;
 var stopwords = ['year', 'live in', 'hq', 'hq version', 'hq video', 'best quality', 'hd colour', 'hd', 'original', 'full cd', 'with lyrics', 'w/ lyrics', 'in stereo', 'hq stereo', 'stereo', 'original version', 'original soundtrack', 'original', 'album version', 'lyrics', 'high quality audio', 'high quality', 'ost', 'promo version', 'promo', 'new stereo remix', 'new stereo', 'great audio quality ', 'great music video', 'audio quality', 'music video', 'official song', 'music quality', 'from mtv', 'lp version', 'official videoclip', 'original videoclip', 'official video', 'original video', 'rare video', 'rare version', 'version', 'itunes']
 var typsng = ['ain\'t', 'alone', 'angel', 'arms', 'around', 'away', 'baby', 'bad', 'beautiful', 'believe', 'blue', 'boy', 'change', 'christmas', 'comes', 'crazy', 'cry', 'dance', 'days', 'dear', 'dream', 'ever', 'everybody', 'everything', 'eyes', 'fall', 'feel', 'fire', 'fool', 'forever', 'girl', 'gone', 'gonna', 'goodbye', 'happy', 'heart', 'heaven', 'hey', 'hold', 'kiss', 'la', 'lady', 'leave', 'life', 'light', 'lonely', 'love', 'lover', 'mama', 'man', 'mind', 'mine', 'miss', 'moon', 'moonlight', 'morning', 'mr', 'music', 'night', 'nobody', 'oh', 'people', 'play', 'please', 'rain', 'red', 'remember', 'river', 'rock', 'roll', 'rose', 'sing', 'smile', 'somebody', 'something', 'song', 'soul', 'star', 'stay', 'stop', 'street', 'summer', 'sun', 'sweet', 'sweetheart', 'talk', 'tears', 'theme', 'things', 'think', 'tonight', 'town', 'true', 'walk', 'wanna', 'wish', 'woman', 'wonderful', 'world', 'young']
-//var song = "'Barry Manilow can't smile without you";
-//var song = "Lovely Sunny Day - Demis Roussos";
-//var song = "Ronettes - Be My Baby - (Remastered Video & Stereo Music - 1965) - Bubblerock - HD"
-//var song = "-NEW- Hey Paula Paul & Paula HQ {Stereo}"
-//var song = '"Never Gonna Fall in Love Again" by Eric Carmen (iTunes)';
-//var song='"I Live My Life For You" - FireHouse (iTunes)';
-//var song = '•°*"˜..BILL PURSELL - OUR WINTER LOVE..˜"*°•';
+
 router.get('/qrytitle', function (req, res) {
     var m = require('../server').initnamedb();
     setTimeout(function () {
