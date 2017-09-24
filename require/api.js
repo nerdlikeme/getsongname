@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var compact = require('underscore');
 var SofiaTree = require('sofia-tree');
+var fuzzy = require('fuzzy');
 //var lev = require('fast-levenshtein');
 //var natural = require('natural');
 //var metaphone = natural.Metaphone;
@@ -31,7 +32,11 @@ router.get('/qrytitle', function (req, res) {
         var song = req.query.title;
         song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "");
 
-        mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
+        //mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
+        mtcharr = song.split(/-|~/g);
+
+
+        var dd = compact.difference(cnvr2arr(song), stopwords);
 
         mtcharr.forEach(function (mtchstr, i) {
             stopwords.forEach(function (stopstr) {
@@ -45,70 +50,59 @@ router.get('/qrytitle', function (req, res) {
         var retsngr = [];
         var retsong = "";
 
-        if (mtcharr.length > 1) {
-            for (k = 0; k < mtcharr.length; k++) {
-                var sngrarr = mtcharr[k].trim().match(/(.*)and(.*)/);
-                var fndflg = false;
-                if (sngrarr !== null) {
-                    sngrarr.forEach(function (sngrstr) {
-                        sngrstr = sngrstr.trim();
-                        fndrslt = sofiaTree.getCompletions(sngrstr);
-                        if (fndrslt.length > 0) {
-                            retsngr.push(fndrslt[0]);
-                            if (k === 0 && retsong == "") {
-                                retsong = mtcharr[1].trim();
-                            } else if (k === 1 && retsong == "") {
-                                retsong = mtcharr[0].trim();
-                            }
-                            k = mtcharr.length;
-                        }
+        if (mtcharr.length < 2) {
+            song=retsng(song,stopwords);
+            var sngarr = cnvr2arr(song);
+            sngarr.forEach(function (m) {
+                fndslt = sofiaTree.getCompletions(m);
+                if (fndslt.length > 0) {
+                    var fndslt = fndslt.map(function (v) {
+                        return v.replace(/ & /g, ' and ');
                     });
-
-                } else {
-                    fndrslt = sofiaTree.getCompletions(mtcharr[k].trim());
-                    if (fndrslt.length > 0) {
-                        retsngr.push(fndrslt[0]);
-                        if (k === 0)
-                            retsong = mtcharr[1].trim();
-                        else if (k === 1)
-                            retsong = mtcharr[0].trim();
-                        k = mtcharr.length;
+                    var a = findLongestCommonSubstring_Quick(song, fndslt.join(" "));
+                    var retval = fndslt.indexOf(a.trim())
+                    if (retval != undefined && retval > -1) {
+                        retsngr.push(a.trim());
                     }
                 }
+            });
+            res.send('{"song":"' + retsng(song, retsngr) + '","singer":' + JSON.stringify(retsngr) + '}');
+        } else {
+            for (k = 0; k < mtcharr.length; k++) {
+                var sngarr = cnvr2arr(mtcharr[k]);
+                sngarr.forEach(function (m, idx) {
+                    fndslt = sofiaTree.getCompletions(m);
+                    if (fndslt.length > 0) {
+                        var fndslt = fndslt.map(function (v) {
+                            return v.replace(/ & /g, ' and ');
+                        });
+                        var a = findLongestCommonSubstring_Quick(song, fndslt.join(" "));
+                        var retval = fndslt.indexOf(a.trim())
+                        if (retval != undefined && retval > -1) {
+                            retsngr.push(a.trim());
+                            k = mtcharr.length;
+                            if (k === 0)
+                                retsong = mtcharr[1].trim();
+                            else
+                                retsong = mtcharr[0].trim();
+                        }                        
+                    }
+                });
             }
-
             res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
-        } else
-            res.send('{"song":"","singer":""}');
+        }
     }, 3000)
 
 });
 
 module.exports = router;
 
+
 function cnvr2arr(tmp) {
     if (tmp == null)
         tmp = " ";
-    // else
-    //     tmp = tmp.toLowerCase().replace(/[-]/, " ").replace(/[^a-zA-Z0-9' ]/g, "");
     var wrdarry = tmp.split(" ");
     var tmp = wrdarry;
-    // tmp.forEach(function(k,i) {
-    //     var t=k.match(new RegExp('(\")(.*)'));
-    //     if (t!==null){
-    //         t.forEach(function(m,j) {
-    //             if ((m!=='"') && (j==0)) {
-    //                 wrdarry[i]=m;
-    //                 wrdarry.splice(i+1,0,'"');
-    //             }
-    //             else if ((m!=='"') && (j==1)){
-    //                 wrdarry.splice(i+1,0,'"');
-    //                 wrdarry
-    //             }
-
-    //             });                               
-    //     };    
-    // });
 
     wrdarry = compact.compact(wrdarry);
 
@@ -140,6 +134,18 @@ findLongestCommonSubstring_Quick = function (a, b) {
         }
     }
     return longest;
+}
+
+
+function retsng(song, cmprarr) {
+    cmprarr.forEach(function (b) {
+        var pattern = new RegExp(b, 'gi')
+        if (song.match(pattern)) {
+            song = song.replace(pattern, "")
+        }
+    });
+
+    return song.trim();
 }
 
 function frmstrng(srcharr, cmprarr) {

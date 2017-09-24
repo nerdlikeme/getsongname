@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nerdlikeme/getsongname/issues"
   },
-  "homepage": "https://github.com/nerdlikeme/getsongname#readme"
+  "homepage": "https://github.com/nerdlikeme/getsongname#readme",
+  "dependencies": {
+    "fuzzy": "^0.1.3"
+  }
 }
