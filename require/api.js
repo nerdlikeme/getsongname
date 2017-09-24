@@ -51,7 +51,7 @@ router.get('/qrytitle', function (req, res) {
         var retsong = "";
 
         if (mtcharr.length < 2) {
-            song=retsng(song,stopwords);
+            song = retsng(song, stopwords);
             var sngarr = cnvr2arr(song);
             sngarr.forEach(function (m) {
                 fndslt = sofiaTree.getCompletions(m);
@@ -62,10 +62,17 @@ router.get('/qrytitle', function (req, res) {
                     var a = findLongestCommonSubstring_Quick(song, fndslt.join(" "));
                     var retval = fndslt.indexOf(a.trim())
                     if (retval != undefined && retval > -1) {
-                        retsngr.push(a.trim());
+                        var snglst = a.trim().split(/,|and/g)
+                        if (snglst > 0) {
+                            sngrlst.forEach(function (sngrvar) {
+                                retsngr.push(sngrvar);
+                            });
+                        } else
+                            retsngr.push(a.trim());
                     }
                 }
             });
+            retsngr = compact.uniq(retsngr);
             res.send('{"song":"' + retsng(song, retsngr) + '","singer":' + JSON.stringify(retsngr) + '}');
         } else {
             for (k = 0; k < mtcharr.length; k++) {
@@ -79,16 +86,25 @@ router.get('/qrytitle', function (req, res) {
                         var a = findLongestCommonSubstring_Quick(song, fndslt.join(" "));
                         var retval = fndslt.indexOf(a.trim())
                         if (retval != undefined && retval > -1) {
-                            retsngr.push(a.trim());
-                            k = mtcharr.length;
+                            var snglst = a.trim().split(/,|and/g)
+                            if (snglst.length > 0) {
+                                snglst.forEach(function (sngrvar) {
+                                    retsngr.push(sngrvar.trim());
+                                });
+                            } else
+                                retsngr.push(a.trim());
+                        }
+                        if (retsngr.length > 0 && retsong === "") {
                             if (k === 0)
                                 retsong = mtcharr[1].trim();
-                            else
+                            else if (k === 1)
                                 retsong = mtcharr[0].trim();
-                        }                        
+                            k = mtcharr.length;
+                        }
                     }
                 });
             }
+            retsngr = compact.uniq(retsngr);
             res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
         }
     }, 3000)
