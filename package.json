@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/nerdlikeme/getsongname#readme",
   "dependencies": {
+    "decision-tree": "^0.3.1",
+    "fast-levenshtein": "^2.0.6",
     "fuzzy": "^0.1.3"
   }
 }
