@@ -162,10 +162,7 @@ router.get('/qrytitle', function (req, res) {
                 });
             }
             retsngr = compact.uniq(retsngr);
-
             res.send('{"song":"' + retsong + '","singer":' + JSON.stringify(retsngr) + '}');
-
-
         }
     }, 3000)
 
