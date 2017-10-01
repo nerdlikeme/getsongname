@@ -5,6 +5,7 @@ var SofiaTree = require('sofia-tree');
 var fuzzy = require('fuzzy');
 var DecisionTree = require('decision-tree');
 var lev = require('fast-levenshtein');
+var url = require('url');
 var stopwords = ['year', 'live in', 'hq', 'hq version', 'hq video', 'best quality', 'hd colour', 'hd', 'original', 'full cd', 'with lyrics', 'w/ lyrics', 'in stereo', 'hq stereo', 'stereo', 'original version', 'original soundtrack', 'original', 'album version', 'lyrics', 'high quality audio', 'high quality', 'ost', 'promo version', 'promo', 'new stereo remix', 'new stereo', 'great audio quality ', 'great music video', 'audio quality', 'music video', 'official song', 'music quality', 'from mtv', 'lp version', 'official videoclip', 'original videoclip', 'official video', 'original video', 'rare video', 'rare version', 'version', 'itunes', 'official music video']
 var typsng = ['ain\'t', 'alone', 'angel', 'arms', 'around', 'away', 'baby', 'bad', 'beautiful', 'believe', 'blue', 'boy', 'change', 'christmas', 'comes', 'crazy', 'cry', 'dance', 'days', 'dear', 'dream', 'ever', 'everybody', 'everything', 'eyes', 'fall', 'feel', 'fire', 'fool', 'forever', 'girl', 'gone', 'gonna', 'goodbye', 'happy', 'heart', 'heaven', 'hey', 'hold', 'kiss', 'la', 'lady', 'leave', 'life', 'light', 'lonely', 'love', 'lover', 'mama', 'man', 'mind', 'mine', 'miss', 'moon', 'moonlight', 'morning', 'mr', 'music', 'night', 'nobody', 'oh', 'people', 'play', 'please', 'rain', 'red', 'remember', 'river', 'rock', 'roll', 'rose', 'sing', 'smile', 'somebody', 'something', 'song', 'soul', 'star', 'stay', 'stop', 'street', 'summer', 'sun', 'sweet', 'sweetheart', 'talk', 'tears', 'theme', 'things', 'think', 'tonight', 'town', 'true', 'walk', 'wanna', 'wish', 'woman', 'wonderful', 'world', 'young']
 
@@ -42,7 +43,12 @@ router.get('/qrytitle', function (req, res) {
         var fndstr = [];
         var fndlen = 0;
         var fndher = "";
-        var song = decodeURIComponent(req.query.title);
+
+        
+        var url_parts = url.parse(req.url, true);
+        //var query = url_parts.query;
+        var song=decodeURIComponent(url_parts.search.substring(url_parts.search.indexOf("?title=")+"?title=".length));
+        //var song = decodeURIComponent(req.query.title);
         song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "");
 
         //mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
