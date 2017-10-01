@@ -42,9 +42,7 @@ router.get('/qrytitle', function (req, res) {
         var fndstr = [];
         var fndlen = 0;
         var fndher = "";
-        var song = req.query.title;
-        console.debug(song);
-        console.debug(encodeURIComponent(song));
+        var song = decodeURIComponent(req.query.title);
         song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "");
 
         //mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
