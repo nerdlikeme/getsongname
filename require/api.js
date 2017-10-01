@@ -49,7 +49,7 @@ router.get('/qrytitle', function (req, res) {
         //var query = url_parts.query;
         var song=decodeURIComponent(url_parts.search.substring(url_parts.search.indexOf("?title=")+"?title=".length));
         //var song = decodeURIComponent(req.query.title);
-        song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "");
+        song = song.toLowerCase().replace(/\&/g, "and").replace(/\" by/g, " \-").replace(/\"/g, "").replace(/\s\d{4}\s/g,"");
 
         //mtcharr = song.match(new RegExp(/[\w\'\!\s]+(?:[- ]\w+)*/g));
 
